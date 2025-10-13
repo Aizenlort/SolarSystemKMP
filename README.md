@@ -6,13 +6,6 @@ Explore the wonders of our solar system! Discover detailed information about eac
   <img src="readme-images/banner/solar_system.png" height=200>
 </p>
 
-## Supported Platforms
-- Android
-- IOS
-- Web (Js & Wasm)
-- Desktop
-
-Web App - Live [View](https://ismai117.github.io/SolarSystemKMP/)
 
 ## Stack
 - 🍎 Shared UI - [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform)
