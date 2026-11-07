@@ -47,17 +47,19 @@ import getPlatform
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import planets.domain.domain.Planet
-
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.ExperimentalMaterial3Api
 import getStringErrorUnknown
 import getStringButtonRetry
 import getStringButtonView
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SharedTransitionScope.PlanetsScreen(
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope,
     navigateToPlanetDetailScreen: (Int) -> Unit,
+    navigateToAboutScreen: () -> Unit,
 ) {
     val planetsViewModel = koinInject<PlanetsViewModel>()
     val state by planetsViewModel.state.collectAsState()
@@ -68,7 +70,21 @@ fun SharedTransitionScope.PlanetsScreen(
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
     val isCompacted = windowAdaptiveInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        topBar = {
+            androidx.compose.material3.TopAppBar(
+                title = { Text("Solar System") },
+                actions = {
+                    IconButton(onClick = navigateToAboutScreen) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "О приложении"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
         Box(
             modifier = modifier
                 .padding(paddingValues)
