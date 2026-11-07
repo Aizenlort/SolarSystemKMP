@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    id("io.gitlab.arturbosch.detekt") version "1.23.6"
 }
 
 kotlin {
@@ -132,3 +133,8 @@ compose.desktop {
 }
 
 tasks.findByName("checkSandboxAndWriteProtection")?.dependsOn("syncComposeResourcesForIos")
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+}
