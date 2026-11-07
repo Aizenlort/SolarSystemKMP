@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.window.core.layout.WindowWidthSizeClass
@@ -53,7 +55,6 @@ fun SharedTransitionScope.PlanetsScreen(
     animatedVisibilityScope: AnimatedVisibilityScope,
     navigateToPlanetDetailScreen: (Int) -> Unit,
 ) {
-
     val planetsViewModel = koinInject<PlanetsViewModel>()
     val state by planetsViewModel.state.collectAsState()
 
@@ -64,57 +65,73 @@ fun SharedTransitionScope.PlanetsScreen(
     val isCompacted = windowAdaptiveInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
 
     Scaffold { paddingValues ->
-
         Box(
             modifier = modifier
                 .padding(paddingValues)
                 .fillMaxSize(),
         ) {
-
-            Column(
-                modifier = modifier.fillMaxSize()
-            ) {
-
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    userScrollEnabled = when {
-                        getPlatform().type == Type.MOBILE -> true
-                        getPlatform().type == Type.NON_MOBILE && isCompacted -> true
-                        else -> false
-                    }
-                ) { page ->
-
-                    PageItem(
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        planet = state.planets.sortedBy { it.planetOrder }[page],
-                        navigateToPlanetDetailScreen = navigateToPlanetDetailScreen
+            when {
+                state.isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
                     )
-
                 }
-
-                PageNavigator(
-                    currentPage = pagerState.currentPage,
-                    lastIndex = state.planets.lastIndex,
-                    animateScrollToPage = { page ->
-                        scope.launch { pagerState.animateScrollToPage(page) }
+                state.errorMessage != null -> {
+                    // БЛОК ОТОБРАЖЕНИЯ ОШИБКИ
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = state.errorMessage ?: "Неизвестная ошибка",
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        OutlinedButton(onClick = { planetsViewModel.getPlanets() }) {
+                            Text("Попробовать снова")
+                        }
                     }
-                )
+                }
+                else -> {
+                    // БЛОК УСПЕШНОЙ ЗАГРУЗКИ
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            userScrollEnabled = when {
+                                getPlatform().type == Type.MOBILE -> true
+                                getPlatform().type == Type.NON_MOBILE && isCompacted -> true
+                                else -> false
+                            }
+                        ) { page ->
+                            PageItem(
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                planet = state.planets.sortedBy { it.planetOrder }[page],
+                                navigateToPlanetDetailScreen = navigateToPlanetDetailScreen
+                            )
+                        }
 
+                        PageNavigator(
+                            currentPage = pagerState.currentPage,
+                            lastIndex = state.planets.lastIndex,
+                            animateScrollToPage = { page ->
+                                scope.launch { pagerState.animateScrollToPage(page) }
+                            }
+                        )
+                    }
+                }
             }
-
-            if (state.isLoading) {
-                CircularProgressIndicator(
-                    modifier = modifier.align(Alignment.Center)
-                )
-            }
-
         }
-
     }
-
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
