@@ -1,41 +1,30 @@
 package planets.data.repository
 
 import kotlinx.coroutines.test.runTest
+import planets.domain.Result
 import planets.domain.domain.Planet
 import planets.domain.repository.PlanetsRepository
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlin.test.assertIs
 
 class PlanetsRepositoryImplTest {
 
     @Test
-    fun testWeatherRepositoryInterface() = runTest {
+    fun testGetPlanetsSuccess() = runTest {
         // Given - Create a fake implementation for testing
-        val fakeRepository = FakePlanetsRepository()
+        val fakeRepository = FakePlanetsRepository(shouldReturnError = false)
 
         // When
-        val planetsResult = fakeRepository.getPlanets()
+        val result = fakeRepository.getPlanets()
 
         // Then
-        assertTrue(planetsResult.isSuccess, "The call should be successful")
-        val weatherList = planetsResult.getOrNull()
-        assertTrue(weatherList?.isNotEmpty() == true, "list should not be empty")
+        assertIs<Result.Success<List<Planet>>>(result)
+        assertTrue(result.data.isNotEmpty(), "List should not be empty")
     }
 
     @Test
-    fun testClearCache() = runTest {
-        // Given
-        val fakeRepository = FakePlanetsRepository()
-
-        // When - This should not throw
-        fakeRepository.clearCache()
-
-        // Then - If we get here, clearCache completed successfully
-        assertTrue(true, "Clear cache should complete without error")
-    }
-
-    @Test
-    fun testWeatherRepositoryErrorHandling() = runTest {
+    fun testGetPlanetsErrorHandling() = runTest {
         // Given - Repository configured to return error
         val fakeRepository = FakePlanetsRepository(shouldReturnError = true)
 
@@ -43,26 +32,28 @@ class PlanetsRepositoryImplTest {
         val result = fakeRepository.getPlanets()
 
         // Then
-        assertTrue(result.isError, "Should return failure when configured for error")
+        assertIs<Result.Error>(result)
+        assertTrue(result.message.contains("Test error"), "Should return failure when configured for error")
     }
 
     @Test
-    fun testWeatherDomainModelFields() = runTest {
+    fun testPlanetDomainModelFields() = runTest {
         // Given
-        val fakeRepository = FakePlanetsRepository()
+        val fakeRepository = FakePlanetsRepository(shouldReturnError = false)
 
         // When
         val result = fakeRepository.getPlanets()
-        val planetsList = result.getOrNull(0)
-        val planet = planetsList?.first()
+
         // Then - Verify all required fields are present
+        assertIs<Result.Success<List<Planet>>>(result)
+        val planet = result.data.firstOrNull()
+
+        assertTrue(planet != null, "Planet should not be null")
         planet?.let {
             assertTrue(it.name.isNotEmpty(), "Name should not be empty")
             assertTrue(it.description.isNotEmpty(), "Description should not be empty")
             assertTrue(it.mass.contains("kg"), "Mass should be in kg")
             assertTrue(it.planetOrder in 1..8, "Order should be correct")
-        } ?: run {
-            kotlin.test.fail("Planet should not be null")
         }
     }
 }
@@ -91,16 +82,19 @@ class FakePlanetsRepository(
         samplePlanet
     )
 
-    override fun getPlanets(): List<Planet> {
+    override suspend fun getPlanets(): Result<List<Planet>> {
         return if (shouldReturnError) {
-            Result.Error(DomainException.Unknown("Test error"))
+            Result.Error("Test error")
         } else {
             Result.Success(samplePlanetsList)
         }
     }
 
-    override fun getPlanetById(planetId: Int): Planet? {
-        return samplePlanet
+    override suspend fun getPlanetById(planetId: Int): Result<Planet?> {
+        return if (shouldReturnError) {
+            Result.Error("Test error")
+        } else {
+            Result.Success(samplePlanet)
+        }
     }
-
 }

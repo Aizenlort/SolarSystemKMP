@@ -1,8 +1,9 @@
 package planets.domain.repository
 
+import planets.domain.Result
 import planets.domain.domain.Planet
 
 interface PlanetsRepository {
-    fun getPlanets(): List<Planet>
-    fun getPlanetById(planetId: Int): Planet?
+    suspend fun getPlanets(): Result<List<Planet>>
+    suspend fun getPlanetById(planetId: Int): Result<Planet?>
 }

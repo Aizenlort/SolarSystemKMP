@@ -1,17 +1,25 @@
 package planets.data.service
 
+import kotlinx.coroutines.delay // Раскомментировать для симуляции ошибки
 import planets.domain.domain.Planet
+import kotlin.time.Duration.Companion.milliseconds
 
-class PlanetsService() {
+class PlanetsService {
 
-    fun getPlanets(): List<Planet> {
+    suspend fun getPlanets(): List<Planet> {
+        // Симуляция сетевой задержки
+        delay(1000.milliseconds)
+
+        // !!! РАСКОММЕНТИРОВАТЬ ЭТУ СТРОКУ, ЧТОБЫ СДЕЛАТЬ СКРИНШОТ ДЛЯ ДЗ !!!
+        // throw Exception("Нет подключения к интернету")
+
         return planets
     }
 
-    fun getPlanetById(planetId: Int): Planet? {
+    suspend fun getPlanetById(planetId: Int): Planet? {
+        delay(500.milliseconds)
         return planets.find { it.planetId == planetId }
     }
-
 }
 
 private val planets = listOf(
