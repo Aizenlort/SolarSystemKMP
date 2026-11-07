@@ -48,6 +48,10 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import planets.domain.domain.Planet
 
+import getStringErrorUnknown
+import getStringButtonRetry
+import getStringButtonView
+
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.PlanetsScreen(
@@ -86,14 +90,14 @@ fun SharedTransitionScope.PlanetsScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = state.errorMessage ?: "Неизвестная ошибка",
+                            text = state.errorMessage ?: getStringErrorUnknown(),
                             color = MaterialTheme.colorScheme.error,
                             fontSize = 18.sp,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
                         OutlinedButton(onClick = { planetsViewModel.getPlanets() }) {
-                            Text("Попробовать снова")
+                            Text(getStringButtonRetry())
                         }
                     }
                 }
@@ -188,7 +192,7 @@ fun SharedTransitionScope.PageItem(
                 }
             ) {
                 Text(
-                    text = "View",
+                    text = getStringButtonView(),
                     fontWeight = FontWeight.Bold
                 )
             }

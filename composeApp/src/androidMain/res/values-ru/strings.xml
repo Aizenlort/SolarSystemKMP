@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Солнечная система</string>
+    <string name="error_unknown">Неизвестная ошибка</string>
+    <string name="button_retry">Попробовать снова</string>
+    <string name="button_view">Подробнее</string>
+</resources>
